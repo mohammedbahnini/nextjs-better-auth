@@ -42,6 +42,7 @@ function RegisterForm(props: Props) {
 
     const onSubmit = async (values: formDataType) => {
 
+        // the same thing as the login page ( use server actions instead )dddddd
 
         setLoading(true);
         setIsSuccess(false);

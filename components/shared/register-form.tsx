@@ -1,56 +1,81 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form';
-import { z } from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import Link from 'next/link';
-import { FormInput } from 'lucide-react';
 import { Button } from '../ui/button';
 import { register } from '@/app/actions/register-action';
+import { formDataType, formSchema } from '@/lib/schemas';
+import Message from './message';
+import RegisterButton from './register-button';
+import { authClient } from '@/lib/auth-client';
 
 interface Props { }
 
-const formSchema = z.object({
-    name: z.string().min(1, 'Name is required '),
-    email: z.string().min(1, 'Email is required').email('Invalid email'),
-    password: z.string().min(1, 'Password is required'),
-    confirmPassword: z.string().min(1, 'Confirm password is required')
-}).refine(data => {
-    return data.password === data.confirmPassword
-}, {
-    message: 'Confirm password is wrong',
-    path: ['confirmPassword']
-})
 
-export type formDataType = z.infer<typeof formSchema>;
 
 
 
 function RegisterForm(props: Props) {
+
+
+    const [isSuccess, setIsSuccess] = useState<boolean>(false);
+    const [isLoading, setLoading] = useState(false);
+    const [message, setMessage] = useState<string | undefined>('')
+    const [messageIsVisible, setMessageIsVisible] = useState(false)
+
+
     const { } = props
 
     const form = useForm<formDataType>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: 'jhon doe',
-            email: 'jhondoe@examle.com',
-            password: '123',
-            confirmPassword: '123'
+            email: 'jhondoe@example.com',
+            password: '123456789',
+            confirmPassword: '123456789'
         }
     })
 
 
     const onSubmit = async (values: formDataType) => {
-        const result = await register(values)
 
-        if (result.success) {
 
-        }
+        setLoading(true);
+        setIsSuccess(false);
+        setMessageIsVisible(false);
+        setMessage('');
+
+
+        authClient.signUp.email({ ...values }, {
+            onSuccess(context) {
+
+                setLoading(false);
+                setIsSuccess(true);
+                setMessageIsVisible(true);
+                setMessage('Account created !');
+
+            },
+            onError(context) {
+                console.log(context.error);
+
+                setLoading(false);
+                setIsSuccess(false);
+                setMessageIsVisible(true);
+                setMessage(context.error.message);
+
+
+            },
+        });
+
+
+
+
+
     }
 
-    const { isSubmitting } = form.formState;
 
 
     return (
@@ -73,6 +98,8 @@ function RegisterForm(props: Props) {
                     )}
                 />
 
+
+
                 <FormField
                     control={form.control}
                     name='email'
@@ -86,6 +113,8 @@ function RegisterForm(props: Props) {
                         </FormItem>
                     )}
                 />
+
+
 
 
                 <FormField
@@ -102,6 +131,9 @@ function RegisterForm(props: Props) {
                     )}
                 />
 
+
+
+
                 <FormField
                     control={form.control}
                     name='confirmPassword'
@@ -116,7 +148,11 @@ function RegisterForm(props: Props) {
                     )}
                 />
 
-                <Button type='submit' className='w-full'>Register</Button>
+
+                <Message isSuccess={isSuccess} message={message} isVisible={messageIsVisible} />
+
+                <RegisterButton isLoading={isLoading} />
+
 
                 <p className='text-sm text-center text-gray-600'>You have an account , <Link href='/' className='underline text-blue-400'>Log in</Link></p>
             </form>

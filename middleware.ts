@@ -35,6 +35,7 @@ export const middleware = async (req: NextRequest) => {
     return NextResponse.next();
 }
 
+// the conif matcher supports regex ( for more advance conditions )
 export const config = {
     matcher: ['/', '/dashboard', '/register']
 }

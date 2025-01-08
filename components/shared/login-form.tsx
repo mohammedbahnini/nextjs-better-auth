@@ -18,6 +18,7 @@ import { authClient } from "@/lib/auth-client";
 import LoginButton from "./login-button";
 import { redirect } from "next/navigation";
 import Message from "./message";
+import {login} from "@/app/actions/login-action";
 
 interface Props { }
 
@@ -45,9 +46,14 @@ function LoginForm(props: Props) {
     },
   });
 
-  // i need to move this method to be execute in the server using auth.api or axios
-  // i nee also to find a solution for state management for the errors and the success messages
-  const onSubmit = (values: formDataType) => {
+  // I need to move this method to be executed in the server using auth.api or axios
+  // I need also to find a solution for state management for the errors and the success messages
+  const onSubmit = async (values: formDataType) => {
+
+      // call the server action
+      //await login(values);
+
+    // sign in using auth client
     authClient.signIn.email(
       { ...values },
       {
@@ -71,11 +77,14 @@ function LoginForm(props: Props) {
         },
       },
     );
+
+
+
   };
 
   return (
-    <Form {...form}>
-      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+    <Form {...form} >
+      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} >
         <FormField
           control={form.control}
           name="email"

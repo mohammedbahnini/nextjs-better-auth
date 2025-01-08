@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { betterAuth , BetterAuthOptions } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./lib/db";
 
@@ -13,4 +13,4 @@ export const auth = betterAuth({
         requireEmailVerification: false,
         autoSignIn: false
     }
-});
+} satisfies  BetterAuthOptions);

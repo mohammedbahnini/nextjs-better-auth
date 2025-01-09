@@ -1,11 +1,6 @@
 import { auth } from "@/auth";
 import LogoutButton from "@/components/shared/logout-button";
-import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
-import axios from "axios";
-import { router } from "better-auth/api";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import React from "react";
 
 interface Props { }
@@ -28,7 +23,7 @@ async function Page(props: Props) {
 
 
   // get the session using auth api { session , user }
-  const {user} = await auth.api.getSession({
+  const { user } = await auth.api.getSession({
     headers: await headers(), // you need to pass the headers object.
   }) as Session;
 

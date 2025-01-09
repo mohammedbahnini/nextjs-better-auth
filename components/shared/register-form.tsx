@@ -42,36 +42,47 @@ function RegisterForm(props: Props) {
 
     const onSubmit = async (values: formDataType) => {
 
-        // the same thing as the login page ( use server actions instead )dddddd
+        // the same thing as the login page ( use server actions instead )
+        // setLoading(true);
+        // setIsSuccess(false);
+        // setMessageIsVisible(false);
+        // setMessage('');
 
+
+        // authClient.signUp.email({ ...values }, {
+        //     onSuccess(context) {
+
+        //         setLoading(false);
+        //         setIsSuccess(true);
+        //         setMessageIsVisible(true);
+        //         setMessage('Account created !');
+
+        //     },
+        //     onError(context) {
+        //         console.log(context.error);
+
+        //         setLoading(false);
+        //         setIsSuccess(false);
+        //         setMessageIsVisible(true);
+        //         setMessage(context.error.message);
+
+
+        //     },
+        // });
+
+        // we use server action to validate email with arcjet in the server not in the client
         setLoading(true);
         setIsSuccess(false);
         setMessageIsVisible(false);
         setMessage('');
 
+        const result = await register(values);
+        console.log(result);
 
-        authClient.signUp.email({ ...values }, {
-            onSuccess(context) {
-
-                setLoading(false);
-                setIsSuccess(true);
-                setMessageIsVisible(true);
-                setMessage('Account created !');
-
-            },
-            onError(context) {
-                console.log(context.error);
-
-                setLoading(false);
-                setIsSuccess(false);
-                setMessageIsVisible(true);
-                setMessage(context.error.message);
-
-
-            },
-        });
-
-
+        setLoading(false);
+        setIsSuccess(result.success);
+        setMessageIsVisible(true);
+        setMessage(result.message);
 
 
 

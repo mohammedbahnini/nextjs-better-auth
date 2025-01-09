@@ -1,14 +1,13 @@
 'use server'
 
-import {auth} from "@/auth";
-import axios, {AxiosError} from "axios";
-import {APIError} from "better-auth/api";
-import {formDataType} from '@/lib/schemas'
-
+import { auth } from "@/auth";
+import axios, { AxiosError } from "axios";
+import { APIError } from "better-auth/api";
+import { formDataType } from '@/lib/schemas'
+import { request } from '@arcjet/next';
+import { aj } from "../arcjet";
 
 export const login = async (values: formDataType) => {
-    console.log(values.email);
-    console.log(values.password)
 
     // call the api auth in the server
     try {
@@ -28,9 +27,10 @@ export const login = async (values: formDataType) => {
         // console.log(response.data);
 
 
+
         // this is an example of calling auth api directly
         const response = await auth.api.signInEmail({
-            body: {...values}
+            body: { ...values }
         });
         console.log(response);
 

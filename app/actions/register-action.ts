@@ -1,10 +1,11 @@
 'use server'
 
 import { auth } from "@/auth";
-import { authClient } from "@/lib/auth-client";
 import { formDataType } from "@/lib/schemas";
 import { APIError } from "better-auth/api";
 import axios from 'axios';
+import { request } from "@arcjet/next";
+import { aj } from "../arcjet";
 
 
 
@@ -15,10 +16,6 @@ type registerResultType = {
 }
 
 
-const errorReturn: registerResultType = {
-    success: false,
-    error: 'An error has occured '
-}
 export const register = async (values: formDataType): Promise<registerResultType> => {
 
     try {
@@ -28,61 +25,88 @@ export const register = async (values: formDataType): Promise<registerResultType
 
         // add some checks ( zod safeParse , user already exists, ... ), but now lets just keep it simple
 
-        var data = JSON.stringify({
-            "name": "jhon doe",
-            "email": "jhondoe@example.com",
-            "password": "123456789"
-        });
 
-        var config = {
-            method: 'post',
-            url: 'http://localhost:3000/api/auth/sign-up/email',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            data: data
-        };
-        axios.post('http://localhost:3000/api/auth/sign-up/email', data)
-            .then(({ data }) => console.log(data))
-            .catch(e => console.log(e.response.data))
+        // register using axios ( data need to be stringified )
+        // const data = JSON.stringify({
+        //     "name": "jhon doe",
+        //     "email": "jhondoe@example.com",
+        //     "password": "123456789"
+        // });
+        // axios.post('http://localhost:3000/api/auth/sign-up/email', data)
+        //     .then(({ data }) => console.log(data))
+        //     .catch(e => console.log(e.response.data))
 
 
+        // we can check if the email is valid using arcjet 
+        const req = await request();
 
-        /*         axios(config)
-                    .then(function (response) {
-                        //console.log(JSON.stringify(response.data));
-                    })
-                    .catch(function (error) {
-                        console.log(error.response.data.message);
-                    });
-        
-         */
+        // Call Arcjet protect
+        const decision = await aj.protect(req, { email: email });
+        console.log("Decision:", decision);
 
 
+        if (decision.isDenied() && decision.reason.isEmail()) {
 
-        /*        const response = await auth.api.signUpEmail({
-                   body: {
-                       email,
-                       name,
-                       password
-                   }
-               })
-               console.log(response);
-        */
+            if (decision.reason.emailTypes.includes("DISPOSABLE")) {
+                return {
+                    success: false,
+                    message: 'We do not allow disposable email addresses.'
+                }
+            } else if (decision.reason.emailTypes.includes("NO_MX_RECORDS")) {
+                return {
+                    success: false,
+                    message: 'Please try with a real email or an active one !'
+                }
+            } else {
+                // This is a catch all
+                return {
+                    success: false,
+                    message: 'An error occured while checking your email , please try later !'
+                }
+            }
+        }
 
-        if (data.user) {
+
+
+
+
+        const response = await auth.api.signUpEmail({
+            body: {
+                email,
+                name,
+                password
+            }
+        })
+        console.log(response);
+
+
+        if (response.user) {
             return {
                 success: true,
                 message: 'You have creatd an account'
             }
         } else
-            return errorReturn
+            return {
+                success: false,
+                message: 'An error occured while creating your account , please try later !'
+            }
 
 
 
     } catch (error) {
-        console.log('mess : ' + error.message)
-        return errorReturn
+        if (error instanceof APIError) {
+            return {
+                success: false,
+                message: error.body.message
+            }
+        }
+        else {
+            return {
+                success: true,
+                message: 'You have creatd an account'
+            }
+        }
+
     }
 
 
